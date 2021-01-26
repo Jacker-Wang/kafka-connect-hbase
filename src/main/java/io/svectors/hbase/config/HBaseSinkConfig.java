@@ -35,6 +35,7 @@ public class HBaseSinkConfig extends AbstractConfig {
     public static final String EVENT_PARSER_CONFIG = "event.parser.class";
     public static String DEFAULT_HBASE_ROWKEY_DELIMITER = ",";
     public static String DEFAULT_HBASE_COLUMN_FAMILY = "d";
+    public static final String TOPICS_CONFIG = "topics";
 
     /*
      * The configuration for a table "test" will be in the format
@@ -45,7 +46,7 @@ public class HBaseSinkConfig extends AbstractConfig {
     public static final String TABLE_ROWKEY_DELIMITER_TEMPLATE = "hbase.%s.rowkey.delimiter";
     public static final String TABLE_COLUMN_FAMILY_TEMPLATE = "hbase.%s.family";
 
-    private static ConfigDef CONFIG = new ConfigDef();
+    public static ConfigDef CONFIG = new ConfigDef();
     private Map<String, String> properties;
 
     static {
@@ -71,7 +72,7 @@ public class HBaseSinkConfig extends AbstractConfig {
      * Validates the properties to ensure the rowkey property is configured for each table.
      */
     public void validate() {
-        final String topicsAsStr = properties.get(ConnectorConfig.TOPICS_CONFIG);
+        final String topicsAsStr = properties.get(TOPICS_CONFIG);
         final String[] topics = topicsAsStr.split(",");
         for(String topic : topics) {
             String key = String.format(TABLE_ROWKEY_COLUMNS_TEMPLATE, topic);
