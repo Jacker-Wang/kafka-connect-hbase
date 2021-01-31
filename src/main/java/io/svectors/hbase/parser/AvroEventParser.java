@@ -19,6 +19,8 @@ import java.util.Map;
  */
 public class AvroEventParser implements EventParser {
 
+    private static final String BEFORE = "before";
+    private static final String AFTER = "after";
     private final static AvroData avroData = new AvroData(100);
     private final Map<String, byte[]> EMPTY_MAP = Collections.emptyMap();
 
@@ -40,6 +42,7 @@ public class AvroEventParser implements EventParser {
 
     /**
      * parses the value.
+     *
      * @param schema
      * @param value
      * @return
@@ -51,19 +54,27 @@ public class AvroEventParser implements EventParser {
             if (data == null || !(data instanceof GenericRecord)) {
                 return EMPTY_MAP;
             }
-            final GenericRecord record = (GenericRecord) data;
+            final GenericRecord record = (GenericRecord)data;
             final List<Field> fields = schema.fields();
+
+            GenericRecord afterGenericRecord = (GenericRecord)record.get(AFTER);
             for (Field field : fields) {
-                final byte[] fieldValue = toValue(record, field);
-                if (fieldValue == null) {
+                if ((AFTER).equals(field.name())) {
+                    List<Field> afterFields = field.schema().fields();
+                    for (Field afterField : afterFields) {
+                        final byte[] fieldValue = toValue(afterGenericRecord, afterField);
+                        if (fieldValue == null) {
+                            continue;
+                        }
+                        values.put(afterField.name(), fieldValue);
+                    }
                     continue;
                 }
-                values.put(field.name(), fieldValue);
             }
             return values;
         } catch (Exception ex) {
-            final String errorMsg = String.format("Failed to parse the schema [%s] , value [%s] with ex [%s]" ,
-               schema, value, ex.getMessage());
+            final String errorMsg = String
+                .format("Failed to parse the schema [%s] , value [%s] with ex [%s]", schema, value, ex.getMessage());
             throw new EventParsingException(errorMsg, ex);
         }
     }
@@ -75,11 +86,11 @@ public class AvroEventParser implements EventParser {
         final Object fieldValue = record.get(fieldName);
         switch (type) {
             case STRING:
-                return Bytes.toBytes((String) fieldValue);
+                return Bytes.toBytes((String)fieldValue);
             case BOOLEAN:
                 return Bytes.toBytes((Boolean)fieldValue);
             case BYTES:
-                return Bytes.toBytes((ByteBuffer) fieldValue);
+                return Bytes.toBytes((ByteBuffer)fieldValue);
             case FLOAT32:
                 return Bytes.toBytes((Float)fieldValue);
             case FLOAT64:
@@ -93,7 +104,7 @@ public class AvroEventParser implements EventParser {
             case INT64:
                 return Bytes.toBytes((Long)fieldValue);
             default:
-                return null;
+                return Bytes.toBytes("");
         }
     }
 }

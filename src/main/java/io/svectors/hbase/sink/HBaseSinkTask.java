@@ -61,6 +61,7 @@ public class HBaseSinkTask extends SinkTask {
         final String zookeeperQuorum = sinkConfig.getString(HBaseSinkConfig.ZOOKEEPER_QUORUM_CONFIG);
         final Configuration configuration = HBaseConfiguration.create();
         configuration.set(HConstants.ZOOKEEPER_QUORUM, zookeeperQuorum);
+        configuration.set(HConstants.ZOOKEEPER_ZNODE_PARENT, "/hbase-unsecure");
 
         final HBaseConnectionFactory connectionFactory = new HBaseConnectionFactory(configuration);
         this.hBaseClient = new HBaseClient(connectionFactory);
